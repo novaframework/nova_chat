@@ -1,6 +1,6 @@
 # Nova chat
 
-Is a pubsub chat using websockets and Nova this is a first experimental what we can do with websockets and Nova.
+Is a pubsub chat using websockets and [Nova](https://github.com/novaframework/nova) this is a first experimental what we can do with websockets and Nova.
 
 nova pubsub will have everything in ets so if nova_pubsub crash and restart all users need to subscribe again and also start a new socket.
 
