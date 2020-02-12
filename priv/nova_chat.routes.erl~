@@ -1,9 +1,0 @@
-#{prefix => "",
-  security => false,
-  routes => [
-            {"/", nova_chat_main_controller, index}
-           ],
- statics => [
-             {"/assets/[...]", "assets"}
-            ]
-}.
