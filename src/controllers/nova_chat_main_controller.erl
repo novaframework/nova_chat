@@ -4,15 +4,15 @@
 	 subscribe/1
         ]).
 
-topic(#{method := <<"PUT">>,
-        bindings := #{topic := Topic}} = Req) ->
+topic(#{req := #{method := <<"PUT">>,
+                 bindings := #{topic := Topic}} = Req}) ->
     io:format("~p~n", [Req]),
     {json, <<"Topic!">>}.
 
-subscribe(#{method := <<"POST">>,
-	    bindings := #{user := User}} = Req) ->
+subscribe(#{req := #{method := <<"POST">>,
+                     bindings := #{user := User}} = Req}) ->
     {ok, Data, _} = cowboy_req:read_body(Req),
-    #{<<"topic">> := Topic} = jsone:decode(Data),
+    #{<<"topic">> := Topic} = json:decode(Data, [maps]),
     nova_pubsub:subscribe(User, Topic),
     {json, <<"Subscribe!">>};
 subscribe(Req) ->

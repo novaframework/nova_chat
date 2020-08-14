@@ -16,10 +16,10 @@ websocket_init(State) ->
     {ok, State}.
 
 websocket_handle({text, Message}, State) ->
-    Decode = jsone:decode(Message),
+    Decode = json:decode(Message, [maps]),
     #{user := User} = State,
     #{<<"topic">> := Topic} = Decode,
-    ok = nova_pubsub:publish(Topic, jsone:encode(Decode#{<<"user">> => User})),
+    ok = nova_pubsub:publish(Topic, json:encode(Decode#{<<"user">> => User}, [maps, binary])),
     {ok, State}.
 
 websocket_info(Payload,State) ->

@@ -4,25 +4,14 @@
   {registered, []},
   {mod, { nova_chat_app, []}},
   {included_applications, [
-                           nova
                           ]},
   {applications,
    [kernel,
     stdlib,
-    nova_pubsub
+    nova_pubsub,
+    nova
    ]},
-  {env,[
-	{dev_mode, true},
-        {web_port, 8080},
-        {rest_only, true},
-        {nova_applications, [
-                               #{
-                                 name => nova_chat,
-                                 routes_file => "priv/nova_chat.routes.erl"
-                                }
-                              ]}
-
-       ]},
+  {env,[]},
   {modules, []},
   {maintainers, []},
   {licenses, ["Apache 2.0"]},
