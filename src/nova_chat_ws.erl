@@ -6,7 +6,7 @@
 	 websocket_info/2,
 	 terminate/3]).
 
-init(Req) ->
+init(#{req := Req}) ->
     #{bindings := UserMap} = Req,
     {ok, UserMap}.
 
