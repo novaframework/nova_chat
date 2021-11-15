@@ -18,7 +18,7 @@ subscribe(#{method := <<"POST">>,
     {ok, Data, _} = cowboy_req:read_body(Req),
     #{<<"topic">> := Topic} = json:decode(Data, [maps]),
     nova_pubsub:subscribe(User, Topic),
-    {json, <<"Subscribe!">>};
+    {json, <<"Subscribed!">>};
 subscribe(Req) ->
     io:format("~p", [Req]),
     {json, <<"default">>}.

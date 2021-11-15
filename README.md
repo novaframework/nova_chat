@@ -1,36 +1,78 @@
-# Nova chat
+# Nova Chat
 
 ![screengrab](screengrab.png)
 
 A pubsub chat demo using websockets and [Nova](https://github.com/novaframework/nova). 
 
-In this implementation `nova_pubsub` stores all state in [ets](https://www.erlang.org/doc/man/ets.html), so if a crash occurs and restarts the application all users will need to re-subscribe and start new sockets again.
+This implementation uses [nova_pubsub](https://github.com/novaframework/nova_pubsub) to store all state in [ets](https://www.erlang.org/doc/man/ets.html). Should the server restart, all current topics are therefore closed and users will need to reconnect.
 
-## API
+## How it works
 
-```bash
- curl -vvv -d '{"topic":"mytopic"}' -X POST http://localhost:8080/user/user1/subscribe
-```
-
-This will inform the system that `user1` is now subscribing to topic `mytopic`.
+The client `POST`s to:
 
 ```javascript
-// Browser console:
-var novachatsocket = new WebSocket("ws://localhost:8080/user/user1/ws");
+await fetch(`http://localhost:8080/user/${user}/subscribe`,
+    { method: 'POST', body: `{"topic":"${topic}"}` }
+)
 ```
 
-This will set `user1` as online on that socket. You can add more users but don't forget that each user needs to subscribe to a topic using the API.
+Informing the backend that `user` wants to subscribe to `topic`.
 
-```javascript
-// Browser console:
-novachatsocket.send('{"topic":"mytopic", "payload":"This is a message"}');
+```erlang
+%% src/controllers/nova_chat_main_controller.erl
+
+subscribe(#{method := <<"POST">>,
+            bindings := #{<<"user">> := User}} = Req) ->
+    {ok, Data, _} = cowboy_req:read_body(Req),
+    #{<<"topic">> := Topic} = json:decode(Data, [maps]),
+    nova_pubsub:subscribe(User, Topic),
+    {json, <<"Subscribed!">>};
 ```
 
-
-Nova chat will know which user is on the websocket the data is sent over, and will add that user to the payload `user` field. Other users that subscribe to this topic and are online will get a message that looks like this:
+client now connects to the backend:
 
 ```javascript
-{"topic":"mytopic",
- "user":"user1",
- "payload":"This is a message"}
+socket = new WebSocket(`ws://localhost:8080/user/${user}/ws`)
+```
+
+```erlang
+%% src/nova_chat_ws.erl
+
+websocket_init(State) ->
+    #{<<"user">> := User} = State,
+    ok = nova_pubsub:online(User, self()),
+    {ok, State}.
+```
+
+This sets `user` as online on that socket.
+
+When a user wants to write a message, client pushes data
+on the socket that gets pickuped up by the backend:
+
+```javascript
+socket.send(JSON.stringify(
+    { 'topic': 'erlang', 'payload': 'Hello Joe!' }))
+```
+
+```erlang
+%% src/nova_chat_ws.erl
+
+websocket_handle({text, Message}, State) ->
+    Decode = json:decode(Message, [maps]),
+    #{<<"user">> := User} = State,
+    #{<<"topic">> := Topic} = Decode,
+    Json = json:encode(Decode#{<<"user">> => User}, 
+                       [maps, binary]),
+    ok = nova_pubsub:publish(Topic, Json),
+    {ok, State}.
+```
+
+Nova looks up all the users that are subscribed to `topic`, and if they are online pushes this message to client:
+
+```javascript
+{
+    "topic": "erlang",
+    "user": "nova",
+    "payload":"Hello Joe!"
+}
 ```
