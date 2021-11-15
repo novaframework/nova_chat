@@ -5,7 +5,7 @@
         ]).
 
 topic(#{req := #{method := <<"PUT">>,
-                 bindings := #{topic := Topic}} = Req}) ->
+                 bindings := #{topic := _Topic}} = Req}) ->
     io:format("~p~n", [Req]),
     {json, <<"Topic!">>}.
 

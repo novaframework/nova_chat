@@ -6,12 +6,12 @@
          post_ws_request/2,
          plugin_info/0]).
 
-pre_ws_request(State, Options) ->
-    logger:info("State: ~p Options: ~p", [State, Options]),
+pre_ws_request(State, _Options) ->
+    logger:info("pre_ws_request!"),
     {ok, State}.
 
-post_ws_request(State, Options) ->
-    logger:info("WS: ~p Options: ~p", [State, Options]),
+post_ws_request(State, _Options) ->
+    logger:info("post_ws_request!"),
     {ok, State}.
     
 plugin_info() ->
