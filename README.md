@@ -1,5 +1,7 @@
 # Nova chat
 
+![screengrab](screengrab.png)
+
 A pubsub chat demo using websockets and [Nova](https://github.com/novaframework/nova). 
 
 In this implementation `nova_pubsub` stores all state in [ets](https://www.erlang.org/doc/man/ets.html), so if a crash occurs and restarts the application all users will need to re-subscribe and start new sockets again.
