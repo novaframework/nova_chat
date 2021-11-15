@@ -11,22 +11,24 @@ init(#{req := Req}) ->
     {ok, UserMap}.
 
 websocket_init(State) ->
-    #{user := User} = State,
+    #{<<"user">> := User} = State,
     ok = nova_pubsub:online(User, self()),
     {ok, State}.
 
 websocket_handle({text, Message}, State) ->
     Decode = json:decode(Message, [maps]),
-    #{user := User} = State,
+    #{<<"user">> := User} = State,
     #{<<"topic">> := Topic} = Decode,
-    ok = nova_pubsub:publish(Topic, json:encode(Decode#{<<"user">> => User}, [maps, binary])),
+    Json = json:encode(Decode#{<<"user">> => User}, 
+                       [maps, binary]),
+    ok = nova_pubsub:publish(Topic, Json),
     {ok, State}.
 
 websocket_info(Payload,State) ->
     {reply, {text, Payload}, State}.
 
 terminate(_, _, State)->
-    #{user := User} = State,
+    #{<<"user">> := User} = State,
     ok = nova_pubsub:offline(User, self()).
 
  	    
