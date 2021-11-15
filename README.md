@@ -1,8 +1,8 @@
 # Nova chat
 
-Is a pubsub chat using websockets and [Nova](https://github.com/novaframework/nova) this is a first experimental what we can do with websockets and Nova.
+A pubsub chat demo using websockets and [Nova](https://github.com/novaframework/nova). 
 
-nova pubsub will have everything in ets so if nova_pubsub crash and restart all users need to subscribe again and also start a new socket.
+In this implementation `nova_pubsub` stores all state in [ets](https://www.erlang.org/doc/man/ets.html), so if a crash occurs and restarts the application all users will need to re-subscribe and start new sockets again.
 
 ## API
 
@@ -10,23 +10,22 @@ nova pubsub will have everything in ets so if nova_pubsub crash and restart all 
  curl -vvv -d '{"topic":"mytopic"}' -X POST http://localhost:8080/user/user1/subscribe
 ```
 
-This api will tell the system that user1 is subscribing to topic `mytopic`.
+This will inform the system that `user1` is now subscribing to topic `mytopic`.
 
 ```javascript
+// Browser console:
 var novachatsocket = new WebSocket("ws://localhost:8080/user/user1/ws");
 ```
 
-This can be done in a developer tool in a browser.
+This will set `user1` as online on that socket. You can add more users but don't forget that each user needs to subscribe to a topic using the API.
 
-This will set user1 as online on that socket. You can add more user but don't forget that each user need to subscribe to a topic. using the api for subscribe.
-
-In browser you can publsih with:
-
-```js
+```javascript
+// Browser console:
 novachatsocket.send('{"topic":"mytopic", "payload":"This is a message"}');
 ```
 
-Nova chat will know what user it is depending on the websocket that the data is sent on so it will add the user field. Other users that subscribe on this and is online will get a message that looks like this:
+
+Nova chat will know which user is on the websocket the data is sent over, and will add that user to the payload `user` field. Other users that subscribe to this topic and are online will get a message that looks like this:
 
 ```javascript
 {"topic":"mytopic",
