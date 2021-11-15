@@ -1,8 +1,12 @@
 -module(nova_chat_main_controller).
 -export([
-	 topic/1,
-	 subscribe/1
+         index/1,
+	     topic/1,
+	     subscribe/1
         ]).
+
+index(_NovaReq) ->
+    {ok, []}.
 
 topic(#{req := #{method := <<"PUT">>,
                  bindings := #{topic := _Topic}} = Req}) ->

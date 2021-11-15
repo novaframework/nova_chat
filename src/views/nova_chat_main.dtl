@@ -1,0 +1,140 @@
+<html>
+
+<head>
+    <title>Nova Chat</title>
+</head>
+
+<body>
+    <div id='topic'>
+        <h1>Nova Chat</h1>
+
+        <p id='topic-topic-p'>Pick a topic.</p>
+        <input id='topic-topic'>
+
+        <p id='topic-name-p'>Pick a name.</p>
+        <input id='topic-name'>
+
+        <button id='topic-button' onclick='pickTopic()'>JOIN</button>
+    </div>
+    <div id='chat' style='display: none'>
+        <h1>Nova Chat</h1>
+
+        <textarea id='chat-messages' readonly></textarea>
+
+        <input id='chat-new-message'>
+
+        <button id='chat-button' onclick='send()'>SEND</button>
+    </div>
+</body>
+
+<style>
+    #topic,
+    #chat {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding-top: 5em;
+        max-width: 50em;
+        margin: 0 auto;
+    }
+
+    h1 {
+        text-align: center;
+    }
+
+    button {
+        margin: 1em;
+        padding: 1em 2em;
+    }
+
+    input,
+    textarea {
+        margin: 1em;
+        padding: 1em;
+    }
+
+    #chat-messages,
+    #chat-new-message {
+        width: 50em;
+    }
+
+    #chat-messages {
+        height: 20em;
+        resize: none;
+    }
+</style>
+
+<script>
+    var socket, chatInput, topicButton, chosenTopic
+
+    const $ = id => document.getElementById(id)
+
+    async function pickTopic() {
+        const topic = $('topic-topic')
+        if (topic.value == '') {
+            $('topic-topic-p').innerHTML = `<i>Please</i> pick a topic.`
+        }
+
+        const name = $('topic-name')
+        if (name.value == '') {
+            $('topic-name-p').innerHTML = `<i>Please</i> pick a name.`
+        }
+
+        if (topic.value == '' || name.value == '') {
+            return
+        }
+
+        $('topic').style.display = 'none'
+        $('chat').style.display = 'flex'
+
+        await setupChat()
+    }
+
+    async function setupChat() {
+        const topic = $('topic-topic').value
+        const user = $('topic-name').value
+
+        await fetch(`http://localhost:8080/user/${user}/subscribe`,
+            { method: 'POST', body: `{"topic":"${topic}"}` }
+        )
+
+        chosenTopic = topic
+
+        setupWebsocket(user)
+    }
+
+    function setupWebsocket(user) {
+        socket = new WebSocket(`ws://localhost:8080/user/${user}/ws`)
+
+        const p = $('chat-messages')
+
+        chatInput = $('chat-new-message')
+        chatInput.focus()
+
+        socket.onmessage = event => {
+            const data = JSON.parse(event.data)
+            const formatted = `${data.user}: ${data.payload}\n`
+            p.value += formatted
+        }
+
+        setTimeout(() =>
+            document.addEventListener('keyup', event => {
+                event.preventDefault()
+                if (event.keyCode != 13) {
+                    return
+                }
+                send()
+            }), 100)
+    }
+
+    function send() {
+        socket.send(JSON.stringify(
+            { 'topic': chosenTopic, 'payload': chatInput.value }))
+
+        chatInput.value = ''
+        chatInput.focus()
+    }
+</script>
+
+</html>
