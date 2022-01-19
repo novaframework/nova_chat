@@ -1,8 +1,8 @@
 -module(nova_chat_main_controller).
 -export([
          index/1,
-	     topic/1,
-	     subscribe/1
+         topic/1,
+         subscribe/1
         ]).
 
 index(_NovaReq) ->
@@ -22,5 +22,3 @@ subscribe(#{method := <<"POST">>,
 subscribe(Req) ->
     io:format("~p", [Req]),
     {json, <<"default">>}.
-
-    
