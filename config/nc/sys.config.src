@@ -1,0 +1,12 @@
+[
+ {kernel, [{logger_level, debug}]},
+ {nova, [{cowboy_configuration, #{port => 8081}},
+         {rest_only, true},
+         {bootstrap_application, nova_chat},
+         {plugins, [{pre_ws_request, nova_chat_ws_plugin, #{}},
+                    {post_ws_request, nova_chat_ws_plugin, #{}},
+                    {pre_request, nova_cors_plugin, #{}}]}
+        ]},
+ {nova_chat, [
+              {nova_applications, [nova_chat]}]}
+].

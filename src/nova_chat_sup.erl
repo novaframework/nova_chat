@@ -28,8 +28,21 @@ start_link() ->
 
 %% Child :: {Id,StartFunc,Restart,Shutdown,Type,Modules}
 init([]) ->
-    {ok, { {one_for_all, 0, 1}, []} }.
+    {ok, { {one_for_all, 0, 1}, [child(nova_chat_srv, nova_chat_srv)]} }.
 
 %%====================================================================
 %% Internal functions
 %%====================================================================
+child(Id, Type, Mod, Args) ->
+    #{id => Id,
+      start => {Mod, start_link, Args},
+      restart => permanent,
+      shutdown => 5000,
+      type => Type,
+      modules => [Mod]}.
+
+child(Id, Type, Mod) ->
+    child(Id, Type, Mod, []).
+
+child(Id, Mod) ->
+    child(Id, worker, Mod).

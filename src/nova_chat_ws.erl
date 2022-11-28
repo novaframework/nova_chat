@@ -12,16 +12,16 @@ init(#{req := Req}) ->
 
 websocket_init(State) ->
     #{<<"user">> := User} = State,
-    ok = nova_pubsub:online(User, self()),
+    ok = nova_chat_srv:online(User, self()),
     {ok, State}.
 
 websocket_handle({text, Message}, State) ->
     Decode = json:decode(Message, [maps]),
     #{<<"user">> := User} = State,
     #{<<"topic">> := Topic} = Decode,
-    Json = json:encode(Decode#{<<"user">> => User}, 
+    Json = json:encode(Decode#{<<"user">> => User},
                        [maps, binary]),
-    ok = nova_pubsub:publish(Topic, Json),
+    ok = nova_chat_srv:publish(Topic, Json),
     {ok, State}.
 
 websocket_info(Payload,State) ->
@@ -29,6 +29,6 @@ websocket_info(Payload,State) ->
 
 terminate(_, _, State)->
     #{<<"user">> := User} = State,
-    ok = nova_pubsub:offline(User, self()).
+    ok = nova_chat_srv:offline(User, self()).
 
- 	    
+

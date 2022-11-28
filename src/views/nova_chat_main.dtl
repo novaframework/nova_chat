@@ -217,7 +217,7 @@
     }
 
     function setupWebsocket(user) {
-        socket = new WebSocket(`ws://localhost:8081/user/${user}/ws`)
+        socket = new WebSocket(`ws://{{host}}/user/${user}/ws`)
 
         const p = $('chat-messages')
 

@@ -8,7 +8,6 @@
   {applications,
    [kernel,
     stdlib,
-    nova_pubsub,
     nova
    ]},
   {env,[]},

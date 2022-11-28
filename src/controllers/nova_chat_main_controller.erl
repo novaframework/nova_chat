@@ -6,7 +6,9 @@
         ]).
 
 index(_NovaReq) ->
-    {ok, []}.
+    {ok, #{port := Port}} = application:get_env(nova, cowboy_configuration),
+    BinPort = integer_to_binary(Port),
+    {ok, [{host, <<"localhost:", BinPort/binary>>}]}.
 
 topic(#{req := #{method := <<"PUT">>,
                  bindings := #{topic := _Topic}} = Req}) ->
@@ -17,7 +19,7 @@ subscribe(#{method := <<"POST">>,
             bindings := #{<<"user">> := User}} = Req) ->
     {ok, Data, _} = cowboy_req:read_body(Req),
     #{<<"topic">> := Topic} = json:decode(Data, [maps]),
-    nova_pubsub:subscribe(User, Topic),
+    nova_chat_srv:subscribe(User, Topic),
     {json, <<"Subscribed!">>};
 subscribe(Req) ->
     io:format("~p", [Req]),
